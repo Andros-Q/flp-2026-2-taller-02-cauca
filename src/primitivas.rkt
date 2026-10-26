@@ -29,51 +29,55 @@
 (define exigir-enteros
   (lambda (args quien)
     (cond
-      [(null? args) #t]
-      [(integer? (car args))
-       (exigir-enteros (cdr args) quien)]
-      [else
-       (eopl:error 'exigir-enteros
-                   "Todos los argumentos deben ser enteros en ~s"
-                   quien)])))
+        [(null? args) #t];;Si recorrio toda la lista y en efecto son numeros devuelve true
+        [(integer? (car args));;Recorre lista si se cumple la condicion de que son enteros(integer)
+         (exigir-enteros (cdr args) quien)]
+        [else (eopl:error quien ;;Si no se cumple ningun caso siginifica que no todos los argumentos son enteros
+           " Todos los argumentos deben ser enteros")]
+      )
+    ))
 
 ;; exigir-booleanos : lista x symbol -> boolean
 ;; Verifica que todos los argumentos sean booleanos.
 (define exigir-booleanos
   (lambda (args quien)
     (cond
-      [(null? args) #t]
-      [(boolean? (car args))
-       (exigir-booleanos (cdr args) quien)]
-      [else
-       (eopl:error 'exigir-booleanos
-                   "Todos los argumentos deben ser booleanos en ~s"
-                   quien)])))
+        [(null? args) #t];;Si recorrio toda la lista y en efecto son booleanos devuelve true
+        [(boolean? (car args));;Recorre lista si se cumple la condicion de que son booleanos
+         (exigir-booleanos (cdr args) quien)]
+        [else (eopl:error quien ;;Si no se cumple ningun caso siginifica que no todos los argumentos son booleanos
+           " Todos los argumentos deben ser booleanos")]
+      )
+    ))
 
 ;; exigir-cantidad : lista x int x symbol -> boolean
 ;; Verifica que lleguen exactamente n argumentos.
 (define exigir-cantidad
   (lambda (args n quien)
     (cond
-      [(= (length args) n) #t]
-      [else
-       (eopl:error 'exigir-cantidad
-                   "Se esperaban ~s argumentos en ~s, pero llegaron ~s"
-                   n quien (length args))])))
+        [(= (length args) n) #t];;Valida que en efecto la cantidad de argumentos sea igual al n establecido
+        [else (eopl:error quien
+                    "Se esperaban ~s argumentos, pero llegaron ~s"
+                    n
+                    (length args))]
+      )
+    ))
 
 ;; exigir-minimo : lista x int x symbol -> boolean
 ;; Verifica que lleguen al menos n argumentos.
 (define exigir-minimo
   (lambda (args n quien)
     (cond
-      [(>= (length args) n) #t]
-      [else
-       (eopl:error 'exigir-minimo
-                   "Se esperaban al menos ~s argumentos en ~s, pero llegaron ~s"
-                   n quien (length args))])))
+        [(>= (length args) n) #t];;Valida que en efecto la cantidad de argumentos sea maypr o igual al n establecido
+        [else (eopl:error quien
+                    "Se esperaban al menos ~s argumentos, pero llegaron ~s"
+                    n
+                    (length args))]
+      )
+    ))
 
-;; operar-primitiva : lista x operacion x valor -> valor
-;; Aplica una operacion acumulando los argumentos.
+;; operar-primitiva : Lista(Valor) x Operación x ValorIdentidad -> Número
+;; Fold-right auxiliar para evaluar primitivas y poder lograr que funcione la operacion.
 (define operar-primitiva
   (lambda (vals operador term)
     (cond

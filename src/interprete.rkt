@@ -83,51 +83,47 @@
 (define evaluar-expresion
   (lambda (exp env)
     (cases expresion exp
-
-      ;;Expresiones numericas
-      (lit-exp (numero)
-        numero)
-
-      ;;Variables
-      (var-exp (identificador)
-        (apply-env env identificador))
-
-      ;;Valores booleanos
+            ;; lit-exp: devuelve el numero.
+      (lit-exp (num)
+        num)
+            ;; var-exp(variable): busca su valor en el ambiente.
+      (var-exp (id)
+        (apply-env env id)
+       )
+           ;; booleanos.
       (true-exp ()
-        #t)
-
+                #t)  
       (false-exp ()
-        #f)
-
-      ;;Primitivas
+                 #f) 
+           ;; prim-exp(primitivas): evalua los argumentos dados y aplica la operacion respectiva.
       (prim-exp (prim rands)
-        (evaluar-primitiva
-         prim
-         (evaluar-rands rands env)))
+        (let ((valores-evaluados
+               (evaluar-rands rands env)))
+          (evaluar-primitiva prim valores-evaluados))
+        )
 
-      ;;Condicional if
-      (if-exp (test-exp then-exp else-exp)
-        (let ((test-value (evaluar-expresion test-exp env)))
-          (if (boolean? test-value)
-              (if test-value
-                  (evaluar-expresion then-exp env)
-                  (evaluar-expresion else-exp env))
-              (eopl:error
-               'evaluar-expresion
-               "La condicion del if debe ser booleana"))))
-
-      ;;Ligadura local let
-      (let-exp (ids rands body)
-        (let ((vals (evaluar-rands rands env)))
-          (if (= (length ids) (length vals))
-              (evaluar-expresion
-               body
-               (ambiente-extendido ids vals env))
-              (eopl:error
-               'evaluar-expresion
-               "La cantidad de identificadores y expresiones de let no coincide"))))
-
-      ;;Procedimientos y creacion de clausuras
+      ;; condicionales  
+      (if-exp (test true-exp false-exp)
+        (let ((value-condicion
+               (evaluar-expresion test env)))
+          (if (boolean? value-condicion)
+              (if value-condicion
+                  (evaluar-expresion true-exp env)
+                  (evaluar-expresion false-exp env))
+              (eopl:error 'evaluar-expresion
+                          "lo siento la condicion debe ser booleana: ~s"
+                          value-condicion)))
+        )
+ 
+      (let-exp (ids rands body);; let-exp se encarga de evaluar los valores en el ambiente original
+        (let ((values          ;; y posteriormente evalua el cuerpo en el ambiente extendido.
+               (evaluar-rands rands env)))
+               (evaluar-expresion
+                body
+              (ambiente-extendido ids values env)))
+        )
+      )
+     ;;Procedimientos y creacion de clausuras
       (proc-exp (ids body)
         (cerradura ids body env))
 
@@ -164,6 +160,8 @@
                env)
               (eopl:error
                'evaluar-expresion
-               "La expresion de control de case debe producir un numero")))))))
+               "La expresion de control de case debe producir un numero"))))    
+  ))
 
+      
 (provide (all-defined-out))
