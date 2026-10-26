@@ -34,27 +34,29 @@
              'apply-procedure
              "Cantidad incorrecta de argumentos. Esperados: ~s; recibidos: ~s"
              (length ids)
-             (length args)))))))
+             (length args)))))
+    ))
 
 ;; evaluar-programa : programa -> valor
 ;; Punto de entrada: evalúa la expresión del programa en el ambiente
 ;; inicial.
 (define evaluar-programa
   (lambda (pgm)
-    (cases programa pgm
-      (a-program (expresion)
-        (evaluar-expresion expresion (ambiente-inicial))))))
+    (cases programa pgm ;;extrae la expresion que se a ingresado
+      (a-program (expresion);;Se evalua esa expresion con el ambiente inicial
+        (evaluar-expresion expresion (ambiente-inicial))))
+    ));;se crea el ambiente inicial con sus variables ya asignadas
 
 ;; evaluar-rands : lista de expresiones x ambiente -> lista de valores
 ;; Evalúa las expresiones de izquierda a derecha en el mismo ambiente.
 (define evaluar-rands
   (lambda (rands env)
-    (if (null? rands)
-        '()
+    (if (null? rands);;Comprobar si la lista de expresiones esta vacia
+        '() ;;devuelve lista vacia
         (cons
-         (evaluar-expresion (car rands) env)
-         (evaluar-rands (cdr rands) env)))))
-
+         (evaluar-expresion (car rands) env);;evaluar-expresion obtiene el valor 
+         (evaluar-rands (cdr rands) env)));;y se agrega ala lista de resultados y se realiza el recorrido de las expresiones del rand
+    ))
 ;; evaluar-caso : valor x lista de numeros x lista de expresiones
 ;;                x expresion x ambiente -> valor
 ;; Busca la primera alternativa de case que coincida con el valor.
@@ -122,7 +124,7 @@
                 body
               (ambiente-extendido ids values env)))
         )
-      )
+     
      ;;Procedimientos y creacion de clausuras
       (proc-exp (ids body)
         (cerradura ids body env))
@@ -160,8 +162,11 @@
                env)
               (eopl:error
                'evaluar-expresion
-               "La expresion de control de case debe producir un numero"))))    
-  ))
+               "La expresion de control de case debe producir un numero"))))
+
+    )))    
+     
+    
 
       
 (provide (all-defined-out))
