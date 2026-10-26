@@ -206,14 +206,152 @@ in case dia of 1 => 100 of 3 => 300 otherwise => 0 end end") 0))
               (check-exn exn:fail?
                          (lambda () (corre "case true of 1 => 1 otherwise => 0 end"))))))
 
+;; ------------------------------------------------------------------
+;; Suites del grupo
+;; ------------------------------------------------------------------
+ 
+(define scanner-pruebas
+  (test-suite
+   "Scanner"
+   (test-case "identificador"
+              (check-equal? (scanner "x") '((identificador x 1)))
+              (check-equal? (scanner "par?") '((identificador par? 1)))
+              (check-equal? (scanner "a_1") '((identificador a_1 1))))
+   (test-case "numeros enteros y flotantes, positivos y negativos"
+              (check-equal? (scanner "42") '((numero 42 1)))
+              (check-equal? (scanner "-7") '((numero -7 1)))
+              (check-equal? (scanner "3.5") '((numero 3.5 1)))
+              (check-equal? (scanner "-3.5") '((numero -3.5 1))))
+   (test-case "los comentarios y los espacios se ignoran"
+              (check-equal? (scanner "// nada
+7") '((numero 7 2)))
+              (check-equal? (scanner "   x   ") '((identificador x 1))))
+   (test-case "el guion abre un numero negativo"
+              (check-equal? (scanner "aplicar-3")
+                            '((identificador aplicar 1) (numero -3 1))))
+   (test-case "una expresion completa produce la cantidad esperada de tokens"
+              (check-equal? (length (scanner "let x = 1 in +(x, 2) end")) 12))))
+ 
+(define parser-pruebas
+  (test-suite
+   "Parser"
+   (test-case "literales y variables"
+              (check-equal? (parser "42") (a-program (lit-exp 42)))
+              (check-equal? (parser "x") (a-program (var-exp 'x)))
+              (check-equal? (parser "true") (a-program (true-exp)))
+              (check-equal? (parser "false") (a-program (false-exp))))
+   (test-case "primitiva"
+              (check-equal? (parser "+(1, 2)")
+                            (a-program (prim-exp (sum-prim)
+                                                 (list (lit-exp 1) (lit-exp 2))))))
+   (test-case "condicional"
+              (check-equal? (parser "if true then 1 else 2 end")
+                            (a-program (if-exp (true-exp) (lit-exp 1) (lit-exp 2)))))
+   (test-case "let"
+              (check-equal? (parser "let x = 1 in x end")
+                            (a-program (let-exp '(x) (list (lit-exp 1)) (var-exp 'x)))))
+   (test-case "proc y apply"
+              (check-equal? (parser "proc (a) a end")
+                            (a-program (proc-exp '(a) (var-exp 'a))))
+              (check-equal? (parser "apply f (1, 2)")
+                            (a-program (app-exp (var-exp 'f)
+                                                (list (lit-exp 1) (lit-exp 2))))))
+   (test-case "letrec y case"
+              (check-equal? (parser "letrec f (k) = k in apply f (1) end")
+                            (a-program (letrec-exp '(f) '((k)) (list (var-exp 'k))
+                                                   (app-exp (var-exp 'f) (list (lit-exp 1))))))
+              (check-equal? (parser "case 1 of 1 => 2 otherwise => 3 end")
+                            (a-program (case-exp (lit-exp 1) '(1) (list (lit-exp 2)) (lit-exp 3))))
+              )
+   (test-case "una aplicacion no puede ser el operador de otra"
+              (check-exn exn:fail? (lambda () (parser "apply (apply f (3)) (4)"))))))
+ 
+(define errores-pruebas
+  (test-suite
+   "Errores y casos limite"
+   (test-case "el operador de apply debe ser un procedimiento"
+              (check-exn exn:fail? (lambda () (corre "apply true (1)")))
+              (check-exn exn:fail? (lambda () (corre "apply n ()"))))
+   (test-case "tipos incorrectos en primitivas"
+              (check-exn exn:fail? (lambda () (corre "+(true, 1)")))
+              (check-exn exn:fail? (lambda () (corre "not(1)")))
+              (check-exn exn:fail? (lambda () (corre "and(1, true)")))
+              (check-exn exn:fail? (lambda () (corre "promedio(true, 2)")))
+              (check-exn exn:fail? (lambda () (corre "mcm(2.5, 5)")))
+              (check-exn exn:fail? (lambda () (corre "implica(true, 1)"))))
+   (test-case "cantidad de argumentos en primitivas"
+              (check-exn exn:fail? (lambda () (corre "add1(1, 2)")))
+              (check-exn exn:fail? (lambda () (corre "mcd(12)")))
+              (check-exn exn:fail? (lambda () (corre "entre(1, 2)"))))
+   (test-case "entre respeta el orden de los limites"
+              (check-equal? (corre "entre(5, 1, 10)") #t)
+              (check-equal? (corre "entre(5, 10, 1)") #f))
+   (test-case "case compara por valor numerico"
+              (check-equal? (corre "case 3.0 of 3 => 1 otherwise => 0 end") 1))
+   (test-case "una clausura recuerda su ambiente de definicion"
+              (check-equal? (corre "let a = 2
+in let f = proc (x) *(x, a) end
+   in let a = 100 in apply f (3) end end
+end") 6))))
+ 
+(define informes-pruebas
+  (test-suite
+   "Programas de los informes"
+   (test-case "programa del AST (5.1)"
+              (check-equal? (corre "let umbral = promedio(n, m, p)
+in
+  letrec
+    contar (k) = if <=(k, umbral)
+                 then apply contar (add1(k))
+                 else k
+                 end
+  in
+    case apply contar (1)
+      of 7 => abs(-(umbral, 7))
+      otherwise => mcd(n, m)
+    end
+  end
+end") 1/3))
+   (test-case "programa de la traza (5.2)"
+              (check-equal? (corre "let desplazar = proc (x, d) +(x, d) end
+in
+  letrec
+    acumular (i, total) = if >(i, m)
+                          then total
+                          else apply acumular
+                                 (add1(i), apply desplazar (total, i))
+                          end
+  in
+    apply acumular (1, q)
+  end
+end") 8))
+   (test-case "let no basta para la recursion (6.2)"
+              (check-exn exn:fail?
+                         (lambda ()
+                           (corre "let fact = proc (n) if ==(n, 0) then 1 else *(n, apply fact (sub1(n))) end end
+in apply fact (5) end"))))
+   (test-case "potencia con exp = 0 y exp = 1"
+              (check-equal? (corre "letrec potencia (base, exp) = if ==(exp, 0) then 1
+else *(base, apply potencia (base, sub1(exp))) end
+in apply potencia (7, 0) end") 1)
+              (check-equal? (corre "letrec potencia (base, exp) = if ==(exp, 0) then 1
+else *(base, apply potencia (base, sub1(exp))) end
+in apply potencia (7, 1) end") 7))
+   (test-case "case sin ramas of usa otherwise"
+              (check-equal? (corre "case 4 otherwise => 9 end") 9))))
+ 
 ;; Las suites que agregue el grupo se declaran arriba y se suman aquí.
-
+ 
 (define fallidas
   (+ (run-tests base)
      (run-tests primitivas-nuevas)
      (run-tests procedimientos)
-     (run-tests recursion-y-case)))
-
+     (run-tests recursion-y-case)
+     (run-tests scanner-pruebas)
+     (run-tests parser-pruebas)
+     (run-tests errores-pruebas)
+     (run-tests informes-pruebas)))
+ 
 (eopl:printf "~%==========================================~%")
 (eopl:printf "  pruebas fallidas en total: ~s~%" fallidas)
 (eopl:printf "==========================================~%")
