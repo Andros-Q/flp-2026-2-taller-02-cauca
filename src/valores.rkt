@@ -22,15 +22,14 @@
 ;; que se requieran entre sí, levanta cycle in loading. Es el único
 ;; campo que queda sin verificar.
 
-
 (require "sintaxis.rkt")
+
 ;;Creo datatype de la cerradura que va guardar el cuerpo del proc recursivo
 (define-datatype procval procval?
-  (cerradura 
-     (ids (list-of symbol?))
-     (body expresion?)
-     (env (lambda (v) #t)) 
-   ))
+  (cerradura
+   (ids (list-of symbol?))
+   (body expresion?)
+   (env (lambda (v) #t))))
 
 ;; Tipo de dato: valor de procedimiento.
 ;; Nombre: procval
@@ -39,11 +38,4 @@
 ;; Representar un procedimiento mediante una clausura que conserva
 ;; sus parámetros, su cuerpo y el ambiente donde fue definido.
 
-(define-datatype procval procval?
-  (cerradura
-   (ids (list-of symbol?))
-   (body expresion?)
-   (env (lambda (v) #t))))
-
 (provide (all-defined-out))
-
