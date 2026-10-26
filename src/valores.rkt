@@ -24,6 +24,13 @@
 
 
 (require "sintaxis.rkt")
+;;Creo datatype de la cerradura que va guardar el cuerpo del proc recursivo
+(define-datatype procval procval?
+  (cerradura 
+     (ids (list-of symbol?))
+     (body expresion?)
+     (env (lambda (v) #t)) 
+   ))
 
 ;; Tipo de dato: valor de procedimiento.
 ;; Nombre: procval

@@ -30,13 +30,24 @@
 ;; inicial.
 (define evaluar-programa
   (lambda (pgm)
-    (eopl:error 'evaluar-programa "Sin implementar")))
+     (cases programa pgm
+       (a-program (expresion) ;;extrae la expresion que se a ingresado
+          (evaluar-expresion expresion;;Se evalua esa expresion con el ambiente inicial
+              (ambiente-inicial))));;se crea el ambiente inicial con sus variables ya asignadas
+    ))
+    
 
 ;; evaluar-rands : lista de expresiones x ambiente -> lista de valores
 ;; Evalúa las expresiones de izquierda a derecha en el mismo ambiente.
 (define evaluar-rands
   (lambda (rands env)
-    (eopl:error 'evaluar-rands "Sin implementar")))
+    (if (null? rands) ;;Comprobar si la lista de expresiones esta vacia
+        '() ;;devuelve lista vacia
+        (cons (evaluar-expresion (car rands) env);;evaluar-expresion obtiene el valor 
+              (evaluar-rands (cdr rands) env) ) ;;y se agrega ala lista de resultados y se realiza el recorrido de las expresiones del rand
+        )
+    ))
+        
 
 ;; evaluar-expresion : expresion x ambiente -> valor
 ;; Recorre el árbol de sintaxis abstracta con cases y evalúa cada
