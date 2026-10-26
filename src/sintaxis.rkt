@@ -71,6 +71,14 @@
     (primitiva ("not") not-prim)
     (primitiva ("and") and-prim)
     (primitiva ("or") or-prim)
+    ;;Parte 2: primitivas nuevas
+    (primitiva ("abs") abs-prim);;Valor absoluto, unaria sobre numeros
+    (primitiva ("mcd") mcd-prim);;Maximo comun divisor, n-aria con n>=2 sobre enteros
+    (primitiva ("mcm") mcm-prim);;Minimo comun multiplo, n-aria con n>=2 sobre enteros
+    (primitiva ("promedio") promedio-prim);;Media aritmetica, n-aria con n>=1 sobre numeros
+    (primitiva ("xor") xor-prim);;O exclusivo, binaria sobre booleanos
+    (primitiva ("implica") implica-prim);;Implicacion logica, binaria sobre booleanos
+    (primitiva ("entre") entre-prim);;Pertenencia a un intervalo cerrado, ternaria sobre numeros
     ))
 
 (sllgen:make-define-datatypes especificacion-lexica especificacion-gramatical)
