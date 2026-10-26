@@ -54,6 +54,50 @@
   Primitivas nuevas
     (interpretar "...")   =>
 
+    Ambiente inicial: n = 10, m = 3, p = 7, q = 2, r = 5.
+
+    abs
+      (interpretar "abs(-7)")                  => 7
+      (interpretar "abs(7)")                   => 7
+      (interpretar "abs(-3.5)")                => 3.5
+      (interpretar "abs(true)")                => error: abs exige un numero
+
+    mcd
+      (interpretar "mcd(12, 18)")              => 6
+      (interpretar "mcd(7, 13)")               => 1
+      (interpretar "mcd(12, 18, 24)")          => 6
+      (interpretar "mcd(1.5, 2)")              => error: mcd exige enteros
+
+    mcm
+      (interpretar "mcm(4, 6)")                => 12
+      (interpretar "mcm(3, 5)")                => 15
+      (interpretar "mcm(2, 3, 4)")             => 12
+      (interpretar "mcm(2.5, 5)")              => error: mcm exige enteros
+
+    promedio
+      (interpretar "promedio(1, 2, 3, 4)")     => 5/2
+      (interpretar "promedio(10)")             => 10
+      (interpretar "promedio(n, m)")           => 13/2
+      (interpretar "promedio(true, 2)")        => error: promedio exige numeros
+
+    xor
+      (interpretar "xor(true, false)")         => #t
+      (interpretar "xor(true, true)")          => #f
+      (interpretar "xor(false, false)")        => #f
+      (interpretar "xor(1, true)")             => error: xor exige booleanos
+
+    implica
+      (interpretar "implica(true, false)")     => #f
+      (interpretar "implica(false, false)")    => #t
+      (interpretar "implica(true, true)")      => #t
+      (interpretar "implica(true, 1)")         => error: implica exige booleanos
+
+    entre
+      (interpretar "entre(5, 1, 10)")          => #t
+      (interpretar "entre(1, 1, 10)")          => #t
+      (interpretar "entre(11, 1, 10)")         => #f
+      (interpretar "entre(1, 2)")              => error: entre exige tres argumentos
+
   Procedimientos
     (interpretar "...")   =>
 

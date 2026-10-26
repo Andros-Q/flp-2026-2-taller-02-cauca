@@ -176,6 +176,45 @@
            (exigir-cantidad args 2 'or)
            (exigir-booleanos args 'or)    
           (or (car args) (cadr args)))
+
+      ;; Parte 2: primitivas nuevas.
+
+      (abs-prim ()
+          (exigir-cantidad args 1 'abs)
+          (exigir-numeros args 'abs)
+          (abs (car args)));;Valor absoluto del unico argumento
+
+      (mcd-prim ()
+          (exigir-minimo args 2 'mcd)
+          (exigir-enteros args 'mcd)
+          (operar-primitiva args gcd 0));;gcd de toda la lista; 0 es el neutro
+
+      (mcm-prim ()
+          (exigir-minimo args 2 'mcm)
+          (exigir-enteros args 'mcm)
+          (operar-primitiva args lcm 1));;lcm de toda la lista; 1 es el neutro
+
+      (promedio-prim ()
+          (exigir-minimo args 1 'promedio)
+          (exigir-numeros args 'promedio)
+          (/ (operar-primitiva args + 0) (length args)));;suma dividida entre la cantidad
+
+      (xor-prim ()
+          (exigir-cantidad args 2 'xor)
+          (exigir-booleanos args 'xor)
+          (not (equal? (car args) (cadr args))));;verdadero solo si los dos difieren
+
+      (implica-prim ()
+          (exigir-cantidad args 2 'implica)
+          (exigir-booleanos args 'implica)
+          (or (not (car args)) (cadr args)));;falso solo con verdadero -> falso
+
+      (entre-prim ()
+          (exigir-cantidad args 3 'entre)
+          (exigir-numeros args 'entre)
+          ;; entre(x, a, b) = a <= x <= b
+          (and (<= (cadr args) (car args))
+               (<= (car args) (caddr args))))
       )))
 
    
