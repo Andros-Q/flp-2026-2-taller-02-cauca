@@ -24,7 +24,7 @@
         [(null? args) #t];;Si recorrio toda la lista y en efecto son numeros devuelve true
         [(number? (car args));;Recorre lista si se cumple la condicion de que son numeros
          (exigir-numeros (cdr args) quien)]
-        [else (eopl:error 'exigir-numeros ;;Si no se cumple ningun caso siginifica que no todos los argumentos son numeros
+        [else (eopl:error quien ;;Si no se cumple ningun caso siginifica que no todos los argumentos son numeros
            "Todos los argumentos deben ser numeros")]
       )
     ))
@@ -37,7 +37,7 @@
         [(null? args) #t];;Si recorrio toda la lista y en efecto son numeros devuelve true
         [(integer? (car args));;Recorre lista si se cumple la condicion de que son enteros(integer)
          (exigir-enteros (cdr args) quien)]
-        [else (eopl:error 'exigir-enteros ;;Si no se cumple ningun caso siginifica que no todos los argumentos son enteros
+        [else (eopl:error quien ;;Si no se cumple ningun caso siginifica que no todos los argumentos son enteros
            " Todos los argumentos deben ser enteros")]
       )
     ))
@@ -50,7 +50,7 @@
         [(null? args) #t];;Si recorrio toda la lista y en efecto son booleanos devuelve true
         [(boolean? (car args));;Recorre lista si se cumple la condicion de que son booleanos
          (exigir-booleanos (cdr args) quien)]
-        [else (eopl:error 'exigir-booleanos ;;Si no se cumple ningun caso siginifica que no todos los argumentos son booleanos
+        [else (eopl:error quien ;;Si no se cumple ningun caso siginifica que no todos los argumentos son booleanos
            " Todos los argumentos deben ser booleanos")]
       )
     ))
@@ -61,7 +61,7 @@
   (lambda (args n quien)
     (cond
         [(= (length args) n) #t];;Valida que en efecto la cantidad de argumentos sea igual al n establecido
-        [else (eopl:error 'exigir-cantidad
+        [else (eopl:error quien
                     "Se esperaban ~s argumentos, pero llegaron ~s"
                     n
                     (length args))]
@@ -74,7 +74,7 @@
   (lambda (args n quien)
     (cond
         [(>= (length args) n) #t];;Valida que en efecto la cantidad de argumentos sea maypr o igual al n establecido
-        [else (eopl:error 'exigir-minimo
+        [else (eopl:error quien
                     "Se esperaban al menos ~s argumentos, pero llegaron ~s"
                     n
                     (length args))]

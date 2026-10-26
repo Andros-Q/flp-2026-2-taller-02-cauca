@@ -56,6 +56,47 @@
 ;; ramifica; el case evalúa la expresión de control una sola vez.
 (define evaluar-expresion
   (lambda (exp env)
-    (eopl:error 'evaluar-expresion "Sin implementar")))
+    (cases expresion exp
+            ;; lit-exp: devuelve el numero.
+      (lit-exp (num)
+        num)
+            ;; var-exp(variable): busca su valor en el ambiente.
+      (var-exp (id)
+        (apply-env env id)
+       )
+           ;; booleanos.
+      (true-exp ()
+                #t)  
+      (false-exp ()
+                 #f) 
+           ;; prim-exp(primitivas): evalua los argumentos dados y aplica la operacion respectiva.
+      (prim-exp (prim rands)
+        (let ((valores-evaluados
+               (evaluar-rands rands env)))
+          (evaluar-primitiva prim valores-evaluados))
+        )
+
+      ;; condicionales  
+      (if-exp (test true-exp false-exp)
+        (let ((value-condicion
+               (evaluar-expresion test env)))
+          (if (boolean? value-condicion)
+              (if value-condicion
+                  (evaluar-expresion true-exp env)
+                  (evaluar-expresion false-exp env))
+              (eopl:error 'evaluar-expresion
+                          "lo siento la condicion debe ser booleana: ~s"
+                          value-condicion)))
+        )
+ 
+      (let-exp (ids rands body);; let-exp se encarga de evaluar los valores en el ambiente original
+        (let ((values          ;; y posteriormente evalua el cuerpo en el ambiente extendido.
+               (evaluar-rands rands env)))
+               (evaluar-expresion
+                body
+              (ambiente-extendido ids values env)))
+        )
+      )
+  ))
 
 (provide (all-defined-out))
