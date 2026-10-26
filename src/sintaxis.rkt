@@ -1,3 +1,4 @@
+
 #lang eopl
 ;Autores: Andres Felipe Quiceno gil Codigo:2477362
 ;Yonier Alejandro Vega Rojas Codigo:2477056
@@ -45,6 +46,7 @@
 (define especificacion-gramatical
   '(
     (programa (expresion) a-program);;Datatype base del programa 
+
     ;;Expresiones de la sintaxis de nuestro lenguaje
     (expresion (numero) lit-exp)
     (expresion (identificador) var-exp)
@@ -56,6 +58,14 @@
                      expresion "end")if-exp)
     (expresion ("let" (arbno identificador "=" expresion)
                 "in" expresion "end") let-exp)
+
+    ;;Procedimientos y aplicación de procedimientos
+    (expresion ("proc" "("
+                (separated-list identificador ",") ")"
+                expresion "end") proc-exp)
+    (expresion ("apply" expresion "("
+                (separated-list expresion ",") ")") apply-exp)
+
     ;;Colocando las primitivas
     (primitiva ("+") sum-prim)
     (primitiva ("-") minus-prim)
