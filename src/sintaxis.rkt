@@ -64,7 +64,7 @@
     ;; Aplicacion de procedimientos
     (expresion
      ("apply" expresion "(" (separated-list expresion ",") ")")
-     apply-exp)
+     app-exp)
 
     ;; Recursion mediante letrec
     (expresion

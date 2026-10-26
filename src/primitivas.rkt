@@ -257,15 +257,14 @@
         (exigir-numeros args 'promedio)
         (/ (operar-primitiva args + 0) (length args)))
 
-      ;; Verifica si el primer argumento esta entre los limites.
-      ;; Los limites se aceptan en cualquier orden, inclusive.
+      ;; Verifica si el primer argumento esta entre los limites 
       (entre-prim ()
         (exigir-cantidad args 3 'entre)
         (exigir-numeros args 'entre)
-        (let ([valor (car args)]
-              [limite1 (cadr args)]
-              [limite2 (caddr args)])
-          (and (>= valor (min limite1 limite2))
-               (<= valor (max limite1 limite2))))))))
+        (let ([x (car args)]
+        [a (cadr args)]
+        [b (caddr args)])
+         (and (<= a x) (<= x b)))
+        ))))
 
 (provide (all-defined-out))

@@ -66,7 +66,7 @@
     (cond
       [(null? valores)
        (evaluar-expresion alternativa-por-defecto env)]
-      [(equal? valor (car valores))
+      [(= valor (car valores))
        (evaluar-expresion (car cuerpos) env)]
       [else
        (evaluar-caso
@@ -130,7 +130,7 @@
         (cerradura ids body env))
 
       ;;Aplicacion de procedimientos
-      (apply-exp (rator rands)
+      (app-exp (rator rands)
         (let ((proc (evaluar-expresion rator env))
               (args (evaluar-rands rands env)))
           (apply-procedure proc args)))
