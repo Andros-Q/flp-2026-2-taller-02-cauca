@@ -32,8 +32,8 @@
         [(null? args) #t];;Si recorrio toda la lista y en efecto son numeros devuelve true
         [(integer? (car args));;Recorre lista si se cumple la condicion de que son enteros(integer)
          (exigir-enteros (cdr args) quien)]
-        [else (eopl:error quien ;;Si no se cumple ningun caso siginifica que no todos los argumentos son enteros
-           " Todos los argumentos deben ser enteros")]
+        [else (eopl:error 'exigir-enteros ;;Si no se cumple ningun caso siginifica que no todos los argumentos son enteros
+           " Todos los argumentos deben ser enteros en ~s" quien)]
       )
     ))
 
@@ -45,8 +45,8 @@
         [(null? args) #t];;Si recorrio toda la lista y en efecto son booleanos devuelve true
         [(boolean? (car args));;Recorre lista si se cumple la condicion de que son booleanos
          (exigir-booleanos (cdr args) quien)]
-        [else (eopl:error quien ;;Si no se cumple ningun caso siginifica que no todos los argumentos son booleanos
-           " Todos los argumentos deben ser booleanos")]
+        [else (eopl:error 'exigir-booleanos ;;Si no se cumple ningun caso siginifica que no todos los argumentos son booleanos
+           " Todos los argumentos deben ser booleanos en ~s" quien)]
       )
     ))
 
@@ -56,10 +56,10 @@
   (lambda (args n quien)
     (cond
         [(= (length args) n) #t];;Valida que en efecto la cantidad de argumentos sea igual al n establecido
-        [else (eopl:error quien
-                    "Se esperaban ~s argumentos, pero llegaron ~s"
+        [else (eopl:error 'exigir-cantidad
+                    "Se esperaban ~s argumentos, pero llegaron ~s en ~s"
                     n
-                    (length args))]
+                    (length args) quien)]
       )
     ))
 
@@ -69,10 +69,10 @@
   (lambda (args n quien)
     (cond
         [(>= (length args) n) #t];;Valida que en efecto la cantidad de argumentos sea maypr o igual al n establecido
-        [else (eopl:error quien
+        [else (eopl:error 'exigir-minimo
                     "Se esperaban al menos ~s argumentos, pero llegaron ~s"
                     n
-                    (length args))]
+                    (length args) quien)]
       )
     ))
 
