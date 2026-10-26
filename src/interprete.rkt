@@ -1,3 +1,4 @@
+
 #lang eopl
 ;Autores: Andres Felipe Quiceno gil Codigo:2477362
 ;Yonier Alejandro Vega Rojas Codigo:2477056
@@ -23,37 +24,62 @@
 ;; ligaduras de los parámetros, no en el ambiente de la llamada.
 (define apply-procedure
   (lambda (proc args)
-    (eopl:error 'apply-procedure "Sin implementar")))
+    (cases procval proc
+      (cerradura (ids body env-claustura)
+        (if (= (length ids) (length args))
+            (evaluar-expresion
+             body
+             (ambiente-extendido ids args env-claustura))
+            (eopl:error
+             'apply-procedure
+             "Cantidad incorrecta de argumentos. Esperados: ~s; recibidos: ~s"
+             (length ids)
+             (length args)))))))
 
 ;; evaluar-programa : programa -> valor
 ;; Punto de entrada: evalúa la expresión del programa en el ambiente
 ;; inicial.
 (define evaluar-programa
   (lambda (pgm)
-     (cases programa pgm
-       (a-program (expresion) ;;extrae la expresion que se a ingresado
-          (evaluar-expresion expresion;;Se evalua esa expresion con el ambiente inicial
-              (ambiente-inicial))));;se crea el ambiente inicial con sus variables ya asignadas
-    ))
-    
+    (cases programa pgm
+      (a-program (expresion)
+        (evaluar-expresion expresion (ambiente-inicial))))))
 
 ;; evaluar-rands : lista de expresiones x ambiente -> lista de valores
 ;; Evalúa las expresiones de izquierda a derecha en el mismo ambiente.
 (define evaluar-rands
   (lambda (rands env)
-    (if (null? rands) ;;Comprobar si la lista de expresiones esta vacia
-        '() ;;devuelve lista vacia
-        (cons (evaluar-expresion (car rands) env);;evaluar-expresion obtiene el valor 
-              (evaluar-rands (cdr rands) env) ) ;;y se agrega ala lista de resultados y se realiza el recorrido de las expresiones del rand
-        )
-    ))
-        
+    (if (null? rands)
+        '()
+        (cons
+         (evaluar-expresion (car rands) env)
+         (evaluar-rands (cdr rands) env)))))
+
+;; evaluar-caso : valor x lista de numeros x lista de expresiones
+;;                x expresion x ambiente -> valor
+;; Busca la primera alternativa de case que coincida con el valor.
+;; Si ninguna coincide, evalúa la alternativa otherwise.
+(define evaluar-caso
+  (lambda (valor valores cuerpos alternativa-por-defecto env)
+    (cond
+      [(null? valores)
+       (evaluar-expresion alternativa-por-defecto env)]
+      [(equal? valor (car valores))
+       (evaluar-expresion (car cuerpos) env)]
+      [else
+       (evaluar-caso
+        valor
+        (cdr valores)
+        (cdr cuerpos)
+        alternativa-por-defecto
+        env)])))
 
 ;; evaluar-expresion : expresion x ambiente -> valor
 ;; Recorre el árbol de sintaxis abstracta con cases y evalúa cada
-;; variante según la semántica del enunciado. El if liga el resultado de
-;; la condición a test-value, lo verifica con boolean? y solo entonces
-;; ramifica; el case evalúa la expresión de control una sola vez.
+;; variante según la semántica del enunciado. El if verifica que la
+;; condición sea booleana; el case evalúa su expresión de control una
+;; sola vez.
+
 (define evaluar-expresion
   (lambda (exp env)
     (cases expresion exp
@@ -97,6 +123,45 @@
               (ambiente-extendido ids values env)))
         )
       )
+     ;;Procedimientos y creacion de clausuras
+      (proc-exp (ids body)
+        (cerradura ids body env))
+
+      ;;Aplicacion de procedimientos
+      (apply-exp (rator rands)
+        (let ((proc (evaluar-expresion rator env))
+              (args (evaluar-rands rands env)))
+          (apply-procedure proc args)))
+
+      ;;Recursion mediante letrec
+      ;;Los nombres de los procedimientos quedan disponibles dentro
+      ;;de sus propios cuerpos y pueden referenciarse entre sí.
+      (letrec-exp (proc-names idss bodies body)
+        (evaluar-expresion
+         body
+         (ambiente-recursivo
+          proc-names
+          idss
+          bodies
+          env)))
+
+      ;;Seleccion mediante case
+      ;;La expresion de control se evalua una sola vez.
+      ;;Las alternativas se comparan en orden y, si ninguna coincide,
+      ;;se evalua la expresion otherwise.
+      (case-exp (exp-control valores cuerpos alternativa-por-defecto)
+        (let ((valor-control (evaluar-expresion exp-control env)))
+          (if (number? valor-control)
+              (evaluar-caso
+               valor-control
+               valores
+               cuerpos
+               alternativa-por-defecto
+               env)
+              (eopl:error
+               'evaluar-expresion
+               "La expresion de control de case debe producir un numero"))))    
   ))
 
+      
 (provide (all-defined-out))
